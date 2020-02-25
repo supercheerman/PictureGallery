@@ -61,36 +61,27 @@ public class LargeImageView extends View {
     }
 
     public void init(){
-        mDetector = new MoveGestureDetector(getContext(), new MoveGestureDetector.OnMoveGestureListener() {
+        mDetector = new MoveGestureDetector(getContext(), new MoveGestureDetector.SimpleMoveGestureDetector() {
+
             @Override
-            public boolean onMoveBegin(MoveGestureDetector detector) {
+            public boolean onMove(MoveGestureDetector detector) {
+                //移动的水平和垂直位移
                 int moveX =(int)detector.getMoveX();
                 int moveY =(int)detector.getMoveY();
                 if(mImageWidth>getWidth()){
-
                     mRect.offset(-moveX,0);
-                    checkWidth();
+                    checkWidth();//边界检测
                     invalidate();
 
                 }if(mImageHeight>getHeight()){
 
                     mRect.offset(0,-moveY);
-                    checkHeight();
+                    checkHeight();//边界检测
                     invalidate();
                 }
                 return true;
-
             }
 
-            @Override
-            public boolean onMove(MoveGestureDetector detector) {
-                return false;
-            }
-
-            @Override
-            public void onMoveEnd(MoveGestureDetector detector) {
-
-            }
         });
     }
     private void checkWidth() {
@@ -135,6 +126,9 @@ public class LargeImageView extends View {
         return true;
     }
 
+    /*
+    * 通过BitmapRegionDecoder来截取图片，大小位置位mRect，然后通过canvas画出来
+    * */
     @Override
     protected void onDraw(Canvas canvas)
     {
@@ -142,6 +136,9 @@ public class LargeImageView extends View {
         canvas.drawBitmap(bm, 0, 0, null);
     }
 
+    /*
+    *根据所给view的大小框选图片中间位置View大小的矩形即为mRect;
+    **/
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec)
     {

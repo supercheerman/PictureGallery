@@ -9,7 +9,6 @@ class MoveGestureDetector extends BaseGestureDetector {
     private PointF mCurrentPointer;
     private PointF mPrePointer;
 
-    private PointF mDeltaPointer= new PointF();
     //最终结果
     private PointF mExternalPointer = new PointF();
 
@@ -22,6 +21,10 @@ class MoveGestureDetector extends BaseGestureDetector {
 
     }
 
+    /*
+    * 有事件发生时LargeImageView调用OnTouchEvent将其传入到MoveGestureDetector的OnTouchEvent方法中
+    * 该方法调用handleInProgressEvent和handleStartProgressEvent其中一个。
+    * */
     @Override
     protected void handleInProgressEvent(MotionEvent event) {
 
@@ -30,34 +33,43 @@ class MoveGestureDetector extends BaseGestureDetector {
             case MotionEvent.ACTION_CANCEL:
                 break;
             case MotionEvent.ACTION_UP:
+                //点击离开时调用onMoveEnd方法
                 mListener.onMoveEnd(this);
-                resetState();
+                resetState();//重置mGestureInProgress判断量和MotionEvent(见父类)
                 break;
             case MotionEvent.ACTION_MOVE:
                 updateStateByEvent(event);
-                boolean update = mListener.onMove(this);
+                mListener.onMove(this);
 
         }
 
     }
 
+    @Override
     protected void handleStartProgressEvent(MotionEvent event)
     {
         int actionCode = event.getAction() & MotionEvent.ACTION_MASK;
         switch (actionCode)
         {
             case MotionEvent.ACTION_DOWN:
-                resetState();//防止没有接收到CANCEL or UP ,保险起见
+                resetState();//防止没有接收到CANCEL or UP ,保险起见，或者第一次使用时
                 mPreMotionEvent = MotionEvent.obtain(event);
                 updateStateByEvent(event);
                 break;
             case MotionEvent.ACTION_MOVE:
-                mGestureInProgress = mListener.onMoveBegin(this);
+                this.mGestureInProgress = mListener.onMoveBegin(this);//onMoveBegin返回为真代表开始移动，下次调用handleInProcess方法
                 break;
         }
 
     }
 
+
+    /*
+    * 从事件中获取点击点并且储存在mCurrentPointer中，并且将上一次点赋给mPrePointer
+    * 计算2点之间移动的位移储存到mExternalPointer中。
+    *
+    * */
+    @Override
     protected void updateStateByEvent(MotionEvent event)
     {
         final MotionEvent prev = mPreMotionEvent;
@@ -77,9 +89,7 @@ class MoveGestureDetector extends BaseGestureDetector {
 
     /**
      * 根据event计算多指中心点
-     *
-     * @param event
-     * @return
+     *多次点击点取中心值
      */
     private PointF caculateFocalPointer(MotionEvent event)
     {
@@ -123,7 +133,7 @@ class MoveGestureDetector extends BaseGestureDetector {
 
         @Override
         public boolean onMoveBegin(MoveGestureDetector detector) {
-            return false;
+            return true;
         }
 
         @Override

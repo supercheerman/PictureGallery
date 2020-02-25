@@ -4,12 +4,16 @@ import android.content.Context;
 import android.view.MotionEvent;
 
 public abstract class  BaseGestureDetector {
+
+    /*
+    * 该布尔量用来控制识别点击开始和结束，第一次调用handleStart，使用后设置为true，第二次调用handleIn
+    * */
     protected boolean mGestureInProgress;
 
     protected MotionEvent mPreMotionEvent;
     protected MotionEvent mCurrentMotionEvent;
 
-    protected Context mContext;
+    private Context mContext;
 
     public BaseGestureDetector(Context context)
     {
