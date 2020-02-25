@@ -26,6 +26,8 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.facebook.imagepipeline.request.Postprocessor;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -93,17 +95,24 @@ public class PictureGalleryFragment extends Fragment {
     }
     private class PictureHolder extends RecyclerView.ViewHolder{
         //类负责绑定图片和ImageView
-        private SubsamplingScaleImageView mImageView;
+        private LargeImageView mImageView;
 
         public PictureHolder(View view){
             super(view);
             mImageView= view.findViewById(R.id.item_picture_view);
+
         }
         public void bindPicture(String url){
-            mImageView.setImage(ImageSource.uri(url));
+           //mImageView.setImage(ImageSource.uri(url));
         }
-        public void bindText(String string){
-
+        public void bindTest(String string){
+            try{
+                Log.i(TAG ,"****");
+                InputStream inputStream = getActivity().getAssets().open(string);
+                mImageView.setInputStream(inputStream);
+            }catch (IOException e){
+                Log.e(TAG,"@______@:",e);
+            }
         }
     }
 
@@ -123,7 +132,7 @@ public class PictureGalleryFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull PictureHolder holder, int position) {
             PictureItem bindItem = mPictureItems.get(position);
-            holder.bindPicture(bindItem.getUrl());
+            //holder.bindTest("mypic.jpg");
         }
 
         @Override

@@ -25,28 +25,36 @@ public class LargeImageView extends View {
 
     private int mImageWidth,mImageHeight;
 
-    private volatile Rect mRect;
+    private volatile Rect mRect =new Rect();
 
     private MoveGestureDetector mDetector;
 
-    private static final Options options = new Options();
+    private static final Options mOptions = new Options();
 
     public LargeImageView(Context context, AttributeSet attrs) {
         super(context,attrs);
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        init();
+        mOptions.inPreferredConfig = Bitmap.Config.RGB_565;
+
     }
 
     public void setInputStream(InputStream is){
         try{
             mDecoder = BitmapRegionDecoder.newInstance(is,false);
+            if(mDecoder ==null){
+                Log.i(TAG,": @______@"+"null");
+            }
             Options tmpOptions =new Options();
-
             tmpOptions.inJustDecodeBounds = true;//对于较大图片不载入内容而获取对象的信息，处理图像前改为false
+            tmpOptions.inPreferredConfig =Bitmap.Config.RGB_565;
+
             BitmapFactory.decodeStream(is,null,tmpOptions);
             mImageWidth = tmpOptions.outWidth;
             mImageHeight = tmpOptions.outHeight;
+            Log.i(TAG,": @______@"+":"+mImageWidth+","+mImageHeight);
             requestLayout();
             invalidate();
+            Log.i(TAG,": @______@"+"setInputStream finished");
         }catch (IOException e){
             Log.e(TAG,"@_____@:",e);
         }finally {
@@ -61,6 +69,7 @@ public class LargeImageView extends View {
     }
 
     public void init(){
+        Log.i(TAG,": @______@"+"init");
         mDetector = new MoveGestureDetector(getContext(), new MoveGestureDetector.SimpleMoveGestureDetector() {
 
             @Override
@@ -132,8 +141,16 @@ public class LargeImageView extends View {
     @Override
     protected void onDraw(Canvas canvas)
     {
-        Bitmap bm = mDecoder.decodeRegion(mRect, options);
-        canvas.drawBitmap(bm, 0, 0, null);
+        Log.i("LargeImageView: ",mRect.right+","+mRect.left+","+mRect.top+","+mRect.bottom);
+
+        if(mDecoder!=null){
+            mOptions.inJustDecodeBounds = false;
+            Bitmap bm = mDecoder.decodeRegion(mRect, mOptions);
+            canvas.drawBitmap(bm, 0, 0, null);
+        }else{
+            Log.i(TAG,"@______@:"+"can not get the bitmap");
+        }
+
     }
 
     /*
@@ -149,7 +166,7 @@ public class LargeImageView extends View {
 
         int imageWidth = mImageWidth;
         int imageHeight = mImageHeight;
-
+        Log.i("LargeImageView: ","!"+width+","+height+","+imageWidth+","+imageHeight);
         //默认直接显示图片的中心区域，可以自己去调节
         mRect.left = imageWidth / 2 - width / 2;
         mRect.top = imageHeight / 2 - height / 2;
