@@ -107,7 +107,6 @@ public class PictureGalleryFragment extends Fragment {
         }
         public void bindTest(String string){
             try{
-                Log.i(TAG ,"****");
                 InputStream inputStream = getActivity().getAssets().open(string);
                 mImageView.setInputStream(inputStream);
             }catch (IOException e){
@@ -132,7 +131,7 @@ public class PictureGalleryFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull PictureHolder holder, int position) {
             PictureItem bindItem = mPictureItems.get(position);
-            //holder.bindTest("mypic.jpg");
+            holder.bindTest("mypic.jpg");
         }
 
         @Override

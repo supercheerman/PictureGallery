@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.media.ExifInterface;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -34,42 +35,34 @@ public class LargeImageView extends View {
     public LargeImageView(Context context, AttributeSet attrs) {
         super(context,attrs);
         init();
+        mOptions.inJustDecodeBounds = true;//对于较大图片不载入内容而获取对象的信息，处理图像前改为false
         mOptions.inPreferredConfig = Bitmap.Config.RGB_565;
 
     }
 
     public void setInputStream(InputStream is){
+
         try{
+
+            BitmapFactory.decodeStream(is,null,mOptions);//因为此处mOption设置inJustDecodeBounds所以会自动对is进行reset
+            mImageWidth = mOptions.outWidth;
+            mImageHeight = mOptions.outHeight;
             mDecoder = BitmapRegionDecoder.newInstance(is,false);
             if(mDecoder ==null){
                 Log.i(TAG,": @______@"+"null");
+            }else{
+                Log.i(TAG,": @______@decoder "+":"+mDecoder.getWidth()+","+mDecoder.getHeight());
             }
-            Options tmpOptions =new Options();
-            tmpOptions.inJustDecodeBounds = true;//对于较大图片不载入内容而获取对象的信息，处理图像前改为false
-            tmpOptions.inPreferredConfig =Bitmap.Config.RGB_565;
-
-            BitmapFactory.decodeStream(is,null,tmpOptions);
-            mImageWidth = tmpOptions.outWidth;
-            mImageHeight = tmpOptions.outHeight;
-            Log.i(TAG,": @______@"+":"+mImageWidth+","+mImageHeight);
             requestLayout();
             invalidate();
-            Log.i(TAG,": @______@"+"setInputStream finished");
+            //Log.i(TAG,": @______@"+"setInputStream finished");
         }catch (IOException e){
             Log.e(TAG,"@_____@:",e);
-        }finally {
-            try{
-                if(is!=null){
-                    is.close();
-                }
-            }catch (Exception e){
-
-            }
         }
     }
 
     public void init(){
-        Log.i(TAG,": @______@"+"init");
+
         mDetector = new MoveGestureDetector(getContext(), new MoveGestureDetector.SimpleMoveGestureDetector() {
 
             @Override
@@ -141,7 +134,7 @@ public class LargeImageView extends View {
     @Override
     protected void onDraw(Canvas canvas)
     {
-        Log.i("LargeImageView: ",mRect.right+","+mRect.left+","+mRect.top+","+mRect.bottom);
+        //Log.i("LargeImageView: ",mRect.right+","+mRect.left+","+mRect.top+","+mRect.bottom);
 
         if(mDecoder!=null){
             mOptions.inJustDecodeBounds = false;
@@ -166,7 +159,7 @@ public class LargeImageView extends View {
 
         int imageWidth = mImageWidth;
         int imageHeight = mImageHeight;
-        Log.i("LargeImageView: ","!"+width+","+height+","+imageWidth+","+imageHeight);
+        //Log.i("LargeImageView: ","!"+width+","+height+","+imageWidth+","+imageHeight);
         //默认直接显示图片的中心区域，可以自己去调节
         mRect.left = imageWidth / 2 - width / 2;
         mRect.top = imageHeight / 2 - height / 2;
